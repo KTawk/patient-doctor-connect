@@ -95,12 +95,12 @@ function TrendChart({ series }: { series: { name: string; color: string; labels:
     <svg viewBox={`0 0 ${W} ${H}`} className="w-full">
       {[0, 9, 18, 27].map((g) => (
         <g key={g}>
-          <line x1={pad} y1={y(g)} x2={W - pad} y2={y(g)} stroke="#e2e8f0" strokeWidth="1" />
-          <text x={4} y={y(g) + 4} fontSize="10" fill="#94a3b8">{g}</text>
+          <line x1={pad} y1={y(g)} x2={W - pad} y2={y(g)} stroke="var(--color-border)" strokeWidth="1" />
+          <text x={4} y={y(g) + 4} fontSize="10" fill="var(--color-muted-foreground)">{g}</text>
         </g>
       ))}
       {series[0].labels.map((lab, i) => (
-        <text key={lab} x={x(i)} y={H - 8} fontSize="10" fill="#64748b" textAnchor="middle">{lab}</text>
+        <text key={lab} x={x(i)} y={H - 8} fontSize="10" fill="var(--color-muted-foreground)" textAnchor="middle">{lab}</text>
       ))}
       {series.map((s) => (
         <g key={s.name}>
@@ -1436,8 +1436,8 @@ export function FollowUp({ profile }: { profile: PatientProfile }) {
     branch.week2,
   ].concat(branch.later);
   const series = [
-    { name: "PHQ-9", color: "#4f46e5", labels: ["Wk0", "Wk2", "Wk4", "Wk8"], points: branch.trend.phq },
-    { name: "GAD-7", color: "#0d9488", labels: ["Wk0", "Wk2", "Wk4", "Wk8"], points: branch.trend.gad },
+    { name: "PHQ-9", color: "#0E6E6A", labels: ["Wk0", "Wk2", "Wk4", "Wk8"], points: branch.trend.phq },
+    { name: "GAD-7", color: "#FF8C69", labels: ["Wk0", "Wk2", "Wk4", "Wk8"], points: branch.trend.gad },
   ];
 
   return (
