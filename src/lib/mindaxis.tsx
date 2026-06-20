@@ -1493,7 +1493,7 @@ export function PatientApp() {
         {tab === "intake" && (
           <Intake profile={profile} phq={phq} setPhq={setPhq} gad={gad} setGad={setGad}
             phqScore={phqScore} gadScore={gadScore} passiveIdeation={passiveIdeation}
-            onSubmit={() => setTab("followup")} />
+            onSubmit={() => setTab("booking")} />
         )}
         {tab === "followup" && <FollowUp profile={profile} />}
       </main>
