@@ -1068,16 +1068,20 @@ function Likert({ items, values, setValues }: { items: string[]; values: number[
 }
 
 export function Intake({ profile, phq, setPhq, gad, setGad, phqScore, gadScore, passiveIdeation, onSubmit }: any) {
-  const [intro, setIntro] = useState(true);
-  if (intro) {
-    return (
-      <InteractiveIntakeChat
-        patientName={profile.name || "Emily"}
-        onBegin={() => setIntro(false)}
-        onDecline={() => setIntro(false)}
-      />
-    );
-  }
+  return (
+    <InteractiveIntakeChat
+      patientName={profile.name || "Emily"}
+      phq={phq}
+      setPhq={setPhq}
+      gad={gad}
+      setGad={setGad}
+      onComplete={onSubmit}
+      onDecline={onSubmit}
+    />
+  );
+}
+
+export function IntakeForm({ profile, phq, setPhq, gad, setGad, phqScore, gadScore, passiveIdeation, onSubmit }: any) {
   return (
     <div className="grid gap-5 lg:grid-cols-3">
       <div className="lg:col-span-2 space-y-5">
