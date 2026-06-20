@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import axisAvatarImg from "@/assets/axis-avatar.jpg";
+import { Mic } from "lucide-react";
 
 export const PHQ9_ITEMS = [
   "Little interest or pleasure in doing things",
