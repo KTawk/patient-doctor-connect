@@ -92,12 +92,12 @@
 .dark {
   /* Midnight Navy background */
   --background: oklch(0.2715 0.1491 206.2111);
-  /* Warm Ivory text */
-  --foreground: oklch(0.9762 0.0566 29.5823);
+  /* Off-white text */
+  --foreground: oklch(0.972 0.005 85);
   --card: oklch(0.3215 0.1491 206.2111);
-  --card-foreground: oklch(0.9762 0.0566 29.5823);
+  --card-foreground: oklch(0.972 0.005 85);
   --popover: oklch(0.3215 0.1491 206.2111);
-  --popover-foreground: oklch(0.9762 0.0566 29.5823);
+  --popover-foreground: oklch(0.972 0.005 85);
   /* Deep Teal primary (slightly lighter for dark mode contrast) */
   --primary: oklch(0.5427 0.3769 178.0926);
   --primary-foreground: oklch(0.9762 0.0566 29.5823);
