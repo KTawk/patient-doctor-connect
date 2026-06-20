@@ -197,7 +197,23 @@ function AvatarChat({ title, lines, chips, onDone, doneLabel = "Continue" }: { t
 
 type ChatTurn = { role: "avatar" | "patient"; text: string };
 
-function InteractiveIntakeChat({ patientName, onBegin, onDecline }: { patientName: string; onBegin: () => void; onDecline: () => void }) {
+function InteractiveIntakeChat({
+  patientName,
+  phq,
+  setPhq,
+  gad,
+  setGad,
+  onComplete,
+  onDecline,
+}: {
+  patientName: string;
+  phq: number[];
+  setPhq: (v: number[]) => void;
+  gad: number[];
+  setGad: (v: number[]) => void;
+  onComplete: () => void;
+  onDecline: () => void;
+}) {
   const firstName = patientName.split(" ")[0] || "there";
   const greeting =
     `Hello, ${firstName}. Before we begin, please note that I cannot provide a medical diagnosis or treatment. ` +
@@ -205,7 +221,8 @@ function InteractiveIntakeChat({ patientName, onBegin, onDecline }: { patientNam
     `please call 911 or go to the nearest emergency department.\n\nHow can I help you today?`;
 
   const [turns, setTurns] = useState<ChatTurn[]>([{ role: "avatar", text: greeting }]);
-  const [stage, setStage] = useState<"concern" | "consent" | "done">("concern");
+  const [stage, setStage] = useState<"concern" | "consent" | "phq" | "gad" | "done">("concern");
+  const [qIndex, setQIndex] = useState(0);
   const [input, setInput] = useState("");
   const [speaking, setSpeaking] = useState(false);
   const [voice, setVoice] = useState(true);
@@ -243,11 +260,68 @@ function InteractiveIntakeChat({ patientName, onBegin, onDecline }: { patientNam
     setInput("");
   };
 
+  const askPhq = (idx: number) => {
+    const preamble = idx === 0
+      ? `Thank you. Over the last 2 weeks, how often have you been bothered by the following?\n\n1. ${PHQ9_ITEMS[idx]}?`
+      : `${idx + 1}. ${PHQ9_ITEMS[idx]}?`;
+    setTurns((t) => [...t, { role: "avatar", text: preamble }]);
+  };
+  const askGad = (idx: number) => {
+    const preamble = idx === 0
+      ? `Great, just a few more. Over the last 2 weeks, how often have you been bothered by the following?\n\n1. ${GAD7_ITEMS[idx]}?`
+      : `${idx + 1}. ${GAD7_ITEMS[idx]}?`;
+    setTurns((t) => [...t, { role: "avatar", text: preamble }]);
+  };
+
   const handleConsent = (yes: boolean) => {
     const label = yes ? "Sure." : "Not right now.";
     setTurns((t) => [...t, { role: "patient", text: label }]);
-    setStage("done");
-    setTimeout(() => (yes ? onBegin() : onDecline()), 450);
+    if (!yes) {
+      setStage("done");
+      setTimeout(() => onDecline(), 450);
+      return;
+    }
+    setStage("phq");
+    setQIndex(0);
+    setTimeout(() => askPhq(0), 300);
+  };
+
+  const answerFreq = (value: number) => {
+    const label = FREQ[value];
+    setTurns((t) => [...t, { role: "patient", text: label }]);
+    if (stage === "phq") {
+      const next = [...phq];
+      next[qIndex] = value;
+      setPhq(next);
+      const nextIdx = qIndex + 1;
+      if (nextIdx < PHQ9_ITEMS.length) {
+        setQIndex(nextIdx);
+        setTimeout(() => askPhq(nextIdx), 250);
+      } else {
+        setStage("gad");
+        setQIndex(0);
+        setTimeout(() => askGad(0), 300);
+      }
+    } else if (stage === "gad") {
+      const next = [...gad];
+      next[qIndex] = value;
+      setGad(next);
+      const nextIdx = qIndex + 1;
+      if (nextIdx < GAD7_ITEMS.length) {
+        setQIndex(nextIdx);
+        setTimeout(() => askGad(nextIdx), 250);
+      } else {
+        setStage("done");
+        setTurns((t) => [
+          ...t,
+          {
+            role: "avatar",
+            text: `Thank you, ${firstName}. I have what I need to prepare your visit. Let's get you booked with a clinician.`,
+          },
+        ]);
+        setTimeout(() => onComplete(), 1200);
+      }
+    }
   };
 
   const concernSuggestions = ["I am feeling anxious.", "I've been feeling down.", "I'm having trouble sleeping.", "I'm stressed at work."];
@@ -311,6 +385,25 @@ function InteractiveIntakeChat({ patientName, onBegin, onDecline }: { patientNam
                 className="rounded-full border border-slate-200 bg-white px-4 py-1.5 text-sm font-semibold text-slate-600 hover:bg-slate-50">
                 Not right now
               </button>
+            </div>
+          )}
+
+          {(stage === "phq" || stage === "gad") && (
+            <div className="space-y-2">
+              <div className="flex flex-wrap gap-2">
+                {FREQ.map((label, i) => (
+                  <button
+                    key={label}
+                    onClick={() => answerFreq(i)}
+                    className="rounded-full border border-indigo-200 bg-white px-3 py-1.5 text-xs font-semibold text-indigo-700 hover:bg-indigo-50"
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+              <p className="text-xs text-slate-400">
+                {stage === "phq" ? `Question ${qIndex + 1} of ${PHQ9_ITEMS.length} (depression screen)` : `Question ${qIndex + 1} of ${GAD7_ITEMS.length} (anxiety screen)`}
+              </p>
             </div>
           )}
 
