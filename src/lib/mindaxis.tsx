@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import axisAvatarImg from "@/assets/axis-avatar.jpg";
+import { Mic } from "lucide-react";
 
 export const PHQ9_ITEMS = [
   "Little interest or pleasure in doing things",
@@ -330,7 +331,20 @@ function InteractiveIntakeChat({
   const submitText = () => {
     const value = input.trim();
     if (!value) return;
-    if (stage === "concern") sendConcern(value);
+    if (stage === "concern") {
+      sendConcern(value);
+    } else if (stage === "consent") {
+      setTurns((t) => [...t, { role: "patient", text: value }]);
+      const yes = /\b(yes|sure|ok|okay|yeah|yep|fine|please)\b/i.test(value);
+      handleConsent(yes);
+    } else {
+      // PHQ/GAD stages: record the message but ask them to use the buttons.
+      setTurns((t) => [
+        ...t,
+        { role: "patient", text: value },
+        { role: "avatar", text: "Thanks — please tap one of the frequency buttons above so I can score this question." },
+      ]);
+    }
     setInput("");
   };
 
@@ -456,20 +470,19 @@ function InteractiveIntakeChat({
               type="button"
               onClick={startMic}
               aria-label="Speak"
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-card text-foreground/70 shadow-sm hover:bg-muted"
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-foreground text-background shadow-sm hover:bg-foreground/90"
             >
-              🎤
+              <Mic className="h-4 w-4" strokeWidth={2.25} />
             </button>
             <input
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder={stage === "concern" ? "Type a message..." : "Use the buttons above to answer"}
-              disabled={stage !== "concern"}
-              className="flex-1 bg-transparent px-2 text-sm placeholder:text-muted-foreground focus:outline-none disabled:cursor-not-allowed"
+              placeholder="Type a message..."
+              className="flex-1 bg-transparent px-2 text-sm placeholder:text-muted-foreground focus:outline-none"
             />
             <button
               type="submit"
-              disabled={stage !== "concern" || !input.trim()}
+              disabled={!input.trim()}
               aria-label="Send"
               className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-foreground text-background shadow-sm hover:bg-foreground disabled:opacity-40"
             >
