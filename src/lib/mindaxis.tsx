@@ -1798,6 +1798,7 @@ export function PatientApp() {
 
   const tabs = [
     { key: "intake", label: "Pre-visit intake" },
+    { key: "chat", label: "Talk with Axis" },
     { key: "booking", label: "Book appointment" },
     { key: "careplan", label: "Care plan" },
     { key: "followup", label: "Follow-up check-in" },
@@ -1808,6 +1809,11 @@ export function PatientApp() {
       <main className="mx-auto max-w-6xl px-4 pb-24 pt-6">
         {tab === "booking" && <Booking />}
         {tab === "intake" && (
+          <IntakeForm profile={profile} phq={phq} setPhq={setPhq} gad={gad} setGad={setGad}
+            phqScore={phqScore} gadScore={gadScore} passiveIdeation={passiveIdeation}
+            onSubmit={() => setTab("booking")} />
+        )}
+        {tab === "chat" && (
           <Intake profile={profile} phq={phq} setPhq={setPhq} gad={gad} setGad={setGad}
             phqScore={phqScore} gadScore={gadScore} passiveIdeation={passiveIdeation}
             onSubmit={() => setTab("booking")} />
