@@ -120,8 +120,8 @@ function AvatarFace({ speaking }: { speaking: boolean }) {
   }, []);
   return (
     <svg viewBox="0 0 96 100" className="h-16 w-16 shrink-0">
-      <circle cx="48" cy="48" r="46" fill="#eef2ff" stroke="#c7d2fe" strokeWidth="2" />
-      <circle cx="48" cy="42" r="22" fill="#6366f1" />
+      <circle cx="48" cy="48" r="46" fill="#E8F0EE" stroke="#AEC3B0" strokeWidth="2" />
+      <circle cx="48" cy="42" r="22" fill="#0E6E6A" />
       <g fill="#ffffff">
         <ellipse cx="40" cy="40" rx="3" ry={blink ? 0.6 : 3} />
         <ellipse cx="56" cy="40" rx="3" ry={blink ? 0.6 : 3} />
@@ -129,7 +129,7 @@ function AvatarFace({ speaking }: { speaking: boolean }) {
       <rect x="42" y="49" width="12" height={speaking ? 5 : 2} rx="2" fill="#ffffff">
         {speaking && <animate attributeName="height" values="2;6;2" dur="0.45s" repeatCount="indefinite" />}
       </rect>
-      <path d="M22 96 a26 22 0 0 1 52 0 z" fill="#6366f1" />
+      <path d="M22 96 a26 22 0 0 1 52 0 z" fill="#0E6E6A" />
     </svg>
   );
 }
