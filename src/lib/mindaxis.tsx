@@ -195,6 +195,132 @@ function AvatarChat({ title, lines, chips, onDone, doneLabel = "Continue" }: { t
   );
 }
 
+type ChatTurn = { role: "avatar" | "patient"; text: string };
+
+function InteractiveIntakeChat({ patientName, onBegin, onDecline }: { patientName: string; onBegin: () => void; onDecline: () => void }) {
+  const firstName = patientName.split(" ")[0] || "there";
+  const greeting =
+    `Hello, ${firstName}. Before we begin, please note that I cannot provide a medical diagnosis or treatment. ` +
+    `If you are experiencing a medical emergency, having thoughts of harming yourself or others, or feel that you are in immediate danger, ` +
+    `please call 911 or go to the nearest emergency department.\n\nHow can I help you today?`;
+
+  const [turns, setTurns] = useState<ChatTurn[]>([{ role: "avatar", text: greeting }]);
+  const [stage, setStage] = useState<"concern" | "consent" | "done">("concern");
+  const [input, setInput] = useState("");
+  const [speaking, setSpeaking] = useState(false);
+  const [voice, setVoice] = useState(true);
+
+  const lastAvatar = useMemo(() => {
+    for (let i = turns.length - 1; i >= 0; i--) if (turns[i].role === "avatar") return turns[i].text;
+    return "";
+  }, [turns]);
+
+  useEffect(() => {
+    if (!lastAvatar) return;
+    const synth = typeof window !== "undefined" ? window.speechSynthesis : null;
+    if (voice && synth) {
+      try {
+        synth.cancel();
+        const u = new SpeechSynthesisUtterance(lastAvatar);
+        u.rate = 1; u.pitch = 1.05;
+        u.onstart = () => setSpeaking(true);
+        u.onend = () => setSpeaking(false);
+        synth.speak(u);
+      } catch (e) { /* voice unavailable */ }
+    }
+    return () => { try { synth && synth.cancel(); } catch (e) {} setSpeaking(false); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lastAvatar, voice]);
+
+  const sendConcern = (text: string) => {
+    const concern = text.trim();
+    if (!concern) return;
+    const reply =
+      `I'm sorry to hear that you're feeling this way, ${firstName}. ` +
+      `I'd like to ask you a few questions to better understand what you're experiencing and help prepare for a healthcare appointment if needed. Is that okay?`;
+    setTurns((t) => [...t, { role: "patient", text: concern }, { role: "avatar", text: reply }]);
+    setStage("consent");
+    setInput("");
+  };
+
+  const handleConsent = (yes: boolean) => {
+    const label = yes ? "Sure." : "Not right now.";
+    setTurns((t) => [...t, { role: "patient", text: label }]);
+    setStage("done");
+    setTimeout(() => (yes ? onBegin() : onDecline()), 450);
+  };
+
+  const concernSuggestions = ["I am feeling anxious.", "I've been feeling down.", "I'm having trouble sleeping.", "I'm stressed at work."];
+
+  return (
+    <Card accent="border-indigo-200">
+      <div className="mb-3 flex items-center justify-between">
+        <h3 className="text-sm font-bold uppercase tracking-wide text-slate-500">Talk with Axis</h3>
+        <div className="flex gap-2">
+          <button onClick={() => setVoice((v) => !v)} className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-500 hover:bg-slate-200">
+            {voice ? "Voice on" : "Voice off"}
+          </button>
+          <button onClick={onBegin} className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-400 hover:bg-slate-200">Skip</button>
+        </div>
+      </div>
+      <div className="flex items-start gap-3">
+        <AvatarFace speaking={speaking} />
+        <div className="flex-1 space-y-3">
+          <div className="text-xs font-semibold text-indigo-600">Axis, your check-in guide</div>
+          <div className="max-h-80 space-y-2 overflow-y-auto pr-1">
+            {turns.map((t, i) => (
+              <div key={i} className={t.role === "avatar" ? "flex justify-start" : "flex justify-end"}>
+                <p className={
+                  t.role === "avatar"
+                    ? "max-w-[85%] whitespace-pre-line rounded-2xl rounded-tl-sm bg-indigo-50 p-3 text-slate-800"
+                    : "max-w-[85%] rounded-2xl rounded-tr-sm bg-indigo-600 p-3 text-white"
+                }>{t.text}</p>
+              </div>
+            ))}
+          </div>
+
+          {stage === "concern" && (
+            <div className="space-y-2">
+              <div className="flex flex-wrap gap-2">
+                {concernSuggestions.map((s) => (
+                  <button key={s} onClick={() => sendConcern(s)}
+                    className="rounded-full border border-indigo-200 bg-white px-3 py-1.5 text-xs font-semibold text-indigo-700 hover:bg-indigo-50">
+                    {s}
+                  </button>
+                ))}
+              </div>
+              <form onSubmit={(e) => { e.preventDefault(); sendConcern(input); }} className="flex gap-2">
+                <input
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  placeholder="Type how you're feeling..."
+                  className="flex-1 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm focus:border-indigo-400 focus:outline-none"
+                />
+                <button type="submit" className="rounded-xl bg-indigo-600 px-4 py-2 text-sm font-bold text-white hover:bg-indigo-700">Send</button>
+              </form>
+            </div>
+          )}
+
+          {stage === "consent" && (
+            <div className="flex flex-wrap gap-2">
+              <button onClick={() => handleConsent(true)}
+                className="rounded-full border border-indigo-200 bg-indigo-600 px-4 py-1.5 text-sm font-bold text-white hover:bg-indigo-700">
+                Sure
+              </button>
+              <button onClick={() => handleConsent(false)}
+                className="rounded-full border border-slate-200 bg-white px-4 py-1.5 text-sm font-semibold text-slate-600 hover:bg-slate-50">
+                Not right now
+              </button>
+            </div>
+          )}
+
+          <p className="text-xs text-slate-400">Axis is supportive, not therapeutic. It never diagnoses or manages crisis. Safety routes to your physician.</p>
+        </div>
+      </div>
+    </Card>
+  );
+}
+
 // ---------------- Per-patient synthetic data ----------------
 
 export type FamilyEntry = { who: string; note: string; tone: Tone };
@@ -851,7 +977,13 @@ function Likert({ items, values, setValues }: { items: string[]; values: number[
 export function Intake({ profile, phq, setPhq, gad, setGad, phqScore, gadScore, passiveIdeation, onSubmit }: any) {
   const [intro, setIntro] = useState(true);
   if (intro) {
-    return <AvatarChat title={profile.conv.intro.title} lines={profile.conv.intro.lines} doneLabel={profile.conv.intro.doneLabel} onDone={() => setIntro(false)} />;
+    return (
+      <InteractiveIntakeChat
+        patientName={profile.name || "Emily"}
+        onBegin={() => setIntro(false)}
+        onDecline={() => setIntro(false)}
+      />
+    );
   }
   return (
     <div className="grid gap-5 lg:grid-cols-3">
