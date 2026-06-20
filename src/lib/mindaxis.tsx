@@ -1816,7 +1816,7 @@ export function PatientApp() {
         {tab === "chat" && (
           <Intake profile={profile} phq={phq} setPhq={setPhq} gad={gad} setGad={setGad}
             phqScore={phqScore} gadScore={gadScore} passiveIdeation={passiveIdeation}
-            onSubmit={() => setTab("booking")} />
+            onSubmit={() => setTab("intake")} />
         )}
         {tab === "careplan" && (
           <div className="rounded-2xl border-2 border-dashed border-border bg-card p-10 text-center">
