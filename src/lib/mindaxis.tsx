@@ -977,7 +977,13 @@ function Likert({ items, values, setValues }: { items: string[]; values: number[
 export function Intake({ profile, phq, setPhq, gad, setGad, phqScore, gadScore, passiveIdeation, onSubmit }: any) {
   const [intro, setIntro] = useState(true);
   if (intro) {
-    return <AvatarChat title={profile.conv.intro.title} lines={profile.conv.intro.lines} doneLabel={profile.conv.intro.doneLabel} onDone={() => setIntro(false)} />;
+    return (
+      <InteractiveIntakeChat
+        patientName={profile.name || "Emily"}
+        onBegin={() => setIntro(false)}
+        onDecline={() => setIntro(false)}
+      />
+    );
   }
   return (
     <div className="grid gap-5 lg:grid-cols-3">
