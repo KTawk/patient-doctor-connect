@@ -334,7 +334,7 @@ function InteractiveIntakeChat({
           <button onClick={() => setVoice((v) => !v)} className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-500 hover:bg-slate-200">
             {voice ? "Voice on" : "Voice off"}
           </button>
-          <button onClick={onBegin} className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-400 hover:bg-slate-200">Skip</button>
+          <button onClick={onComplete} className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-400 hover:bg-slate-200">Skip</button>
         </div>
       </div>
       <div className="flex items-start gap-3">
