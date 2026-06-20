@@ -1483,6 +1483,7 @@ export function PatientApp() {
   const tabs = [
     { key: "intake", label: "Pre-visit intake" },
     { key: "booking", label: "Book appointment" },
+    { key: "careplan", label: "Care plan" },
     { key: "followup", label: "Follow-up check-in" },
   ];
   return (
@@ -1494,6 +1495,12 @@ export function PatientApp() {
           <Intake profile={profile} phq={phq} setPhq={setPhq} gad={gad} setGad={setGad}
             phqScore={phqScore} gadScore={gadScore} passiveIdeation={passiveIdeation}
             onSubmit={() => setTab("booking")} />
+        )}
+        {tab === "careplan" && (
+          <div className="rounded-2xl border-2 border-dashed border-slate-300 bg-white p-10 text-center">
+            <h2 className="text-lg font-extrabold text-slate-900">Care plan</h2>
+            <p className="mt-2 text-slate-600">Care plan waiting for doctor's approval</p>
+          </div>
         )}
         {tab === "followup" && <FollowUp profile={profile} />}
       </main>
@@ -1540,7 +1547,15 @@ export function DoctorApp() {
             safetyConfirmed={safetyConfirmed} setSafetyConfirmed={setSafetyConfirmed}
             onCarePlan={() => setTab("careplan")} />
         )}
-        {tab === "careplan" && profile && <CarePlanScreen profile={profile} onFollowup={() => setTab("followup")} />}
+        {tab === "careplan" && profile && (
+          <div className="space-y-4">
+            <div className="flex flex-wrap gap-3">
+              <button className="rounded-xl bg-emerald-600 px-4 py-2 font-bold text-white hover:bg-emerald-700">Approve care plan</button>
+              <button className="rounded-xl border border-slate-300 bg-white px-4 py-2 font-bold text-slate-700 hover:bg-slate-50">Edit care plan</button>
+            </div>
+            <CarePlanScreen profile={profile} onFollowup={() => setTab("followup")} />
+          </div>
+        )}
         {tab === "followup" && profile && <FollowUp profile={profile} />}
         {tab === "fhir" && <FhirScreen />}
       </main>
