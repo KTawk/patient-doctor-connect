@@ -916,8 +916,8 @@ export function PatientApp() {
   const passiveIdeation = phq[8] > 0;
 
   const tabs = [
-    { key: "booking", label: "Book appointment" },
     { key: "intake", label: "Pre-visit intake" },
+    { key: "booking", label: "Book appointment" },
     { key: "followup", label: "Follow-up check-in" },
   ];
   return (
@@ -937,12 +937,14 @@ export function PatientApp() {
 }
 
 export function DoctorApp() {
-  const [tab, setTab] = useState("dashboard");
+  const [tab, setTab] = useState("patients");
+  const [selectedPatient, setSelectedPatient] = useState<string | null>(null);
   const [safetyConfirmed, setSafetyConfirmed] = useState(false);
   const phqScore = SOFIA_PHQ9.reduce((a, b) => a + b, 0);
   const gadScore = SOFIA_GAD7.reduce((a, b) => a + b, 0);
 
   const tabs = [
+    { key: "patients", label: "Patients" },
     { key: "dashboard", label: "Physician dashboard" },
     { key: "careplan", label: "Care plan" },
     { key: "followup", label: "Follow-up journey" },
@@ -952,6 +954,12 @@ export function DoctorApp() {
     <div className="min-h-screen bg-slate-100 text-slate-800">
       <AppHeader role="doctor" tabs={tabs} active={tab} setActive={setTab} />
       <main className="mx-auto max-w-6xl px-4 pb-24 pt-6">
+        {tab === "patients" && (
+          <PatientsList
+            selectedId={selectedPatient}
+            onSelect={(id) => { setSelectedPatient(id); setTab("dashboard"); }}
+          />
+        )}
         {tab === "dashboard" && (
           <Dashboard phqScore={phqScore} gadScore={gadScore}
             safetyConfirmed={safetyConfirmed} setSafetyConfirmed={setSafetyConfirmed}
