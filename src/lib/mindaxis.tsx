@@ -907,6 +907,59 @@ export function AppHeader({ role, tabs, active, setActive }: { role: "patient" |
   );
 }
 
+const PATIENT_ROSTER = [
+  { id: "sofia", name: "Sofia M.", age: 34, reason: "Stress and poor sleep", status: "Active", tone: "bad" as Tone, phq: 16, gad: 13, next: "Today, 10:30" },
+  { id: "marcus", name: "Marcus T.", age: 41, reason: "Medication review", status: "Follow-up", tone: "warn" as Tone, phq: 9, gad: 7, next: "Jun 24, 14:00" },
+  { id: "elena", name: "Elena R.", age: 28, reason: "Anxiety", status: "Stable", tone: "ok" as Tone, phq: 5, gad: 6, next: "Jul 02, 09:00" },
+  { id: "james", name: "James K.", age: 52, reason: "Annual visit", status: "New intake", tone: "info" as Tone, phq: 3, gad: 4, next: "Jun 27, 11:30" },
+  { id: "priya", name: "Priya S.", age: 37, reason: "Insomnia and low mood", status: "Active", tone: "warn" as Tone, phq: 12, gad: 10, next: "Jun 23, 15:30" },
+];
+
+export function PatientsList({ selectedId, onSelect }: { selectedId: string | null; onSelect: (id: string) => void }) {
+  const [query, setQuery] = useState("");
+  const filtered = PATIENT_ROSTER.filter((p) => p.name.toLowerCase().includes(query.toLowerCase()) || p.reason.toLowerCase().includes(query.toLowerCase()));
+  return (
+    <div className="space-y-5">
+      <Card title="Patient roster" right={<Pill tone="info">{PATIENT_ROSTER.length} patients</Pill>}>
+        <input
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Search by name or reason"
+          className="mb-3 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-indigo-400"
+        />
+        <div className="grid gap-2">
+          {filtered.map((p) => (
+            <button
+              key={p.id}
+              onClick={() => onSelect(p.id)}
+              className={`flex items-center justify-between gap-3 rounded-xl border p-3 text-left transition ${selectedId === p.id ? "border-indigo-500 bg-indigo-50" : "border-slate-200 bg-white hover:border-indigo-200"}`}
+            >
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-100 font-bold text-indigo-700">
+                  {p.name.split(" ").map((n) => n[0]).join("")}
+                </div>
+                <div>
+                  <div className="text-sm font-bold text-slate-900">{p.name} <span className="font-normal text-slate-500">· {p.age}</span></div>
+                  <div className="text-xs text-slate-500">{p.reason}</div>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="hidden text-right text-xs text-slate-500 sm:block">
+                  <div>PHQ-9 <b className="text-slate-700">{p.phq}</b> · GAD-7 <b className="text-slate-700">{p.gad}</b></div>
+                  <div>Next: {p.next}</div>
+                </div>
+                <Pill tone={p.tone}>{p.status}</Pill>
+              </div>
+            </button>
+          ))}
+          {filtered.length === 0 && <p className="text-sm text-slate-500">No patients match your search.</p>}
+        </div>
+      </Card>
+      <p className="text-center text-xs text-slate-400">Select a patient to open their chart in the physician dashboard.</p>
+    </div>
+  );
+}
+
 export function PatientApp() {
   const [tab, setTab] = useState("intake");
   const [phq, setPhq] = useState(SOFIA_PHQ9);
@@ -916,8 +969,8 @@ export function PatientApp() {
   const passiveIdeation = phq[8] > 0;
 
   const tabs = [
-    { key: "booking", label: "Book appointment" },
     { key: "intake", label: "Pre-visit intake" },
+    { key: "booking", label: "Book appointment" },
     { key: "followup", label: "Follow-up check-in" },
   ];
   return (
@@ -937,12 +990,14 @@ export function PatientApp() {
 }
 
 export function DoctorApp() {
-  const [tab, setTab] = useState("dashboard");
+  const [tab, setTab] = useState("patients");
+  const [selectedPatient, setSelectedPatient] = useState<string | null>(null);
   const [safetyConfirmed, setSafetyConfirmed] = useState(false);
   const phqScore = SOFIA_PHQ9.reduce((a, b) => a + b, 0);
   const gadScore = SOFIA_GAD7.reduce((a, b) => a + b, 0);
 
   const tabs = [
+    { key: "patients", label: "Patients" },
     { key: "dashboard", label: "Physician dashboard" },
     { key: "careplan", label: "Care plan" },
     { key: "followup", label: "Follow-up journey" },
@@ -952,6 +1007,12 @@ export function DoctorApp() {
     <div className="min-h-screen bg-slate-100 text-slate-800">
       <AppHeader role="doctor" tabs={tabs} active={tab} setActive={setTab} />
       <main className="mx-auto max-w-6xl px-4 pb-24 pt-6">
+        {tab === "patients" && (
+          <PatientsList
+            selectedId={selectedPatient}
+            onSelect={(id) => { setSelectedPatient(id); setTab("dashboard"); }}
+          />
+        )}
         {tab === "dashboard" && (
           <Dashboard phqScore={phqScore} gadScore={gadScore}
             safetyConfirmed={safetyConfirmed} setSafetyConfirmed={setSafetyConfirmed}
