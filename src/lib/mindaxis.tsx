@@ -95,12 +95,12 @@ function TrendChart({ series }: { series: { name: string; color: string; labels:
     <svg viewBox={`0 0 ${W} ${H}`} className="w-full">
       {[0, 9, 18, 27].map((g) => (
         <g key={g}>
-          <line x1={pad} y1={y(g)} x2={W - pad} y2={y(g)} stroke="#e2e8f0" strokeWidth="1" />
-          <text x={4} y={y(g) + 4} fontSize="10" fill="#94a3b8">{g}</text>
+          <line x1={pad} y1={y(g)} x2={W - pad} y2={y(g)} stroke="var(--color-border)" strokeWidth="1" />
+          <text x={4} y={y(g) + 4} fontSize="10" fill="var(--color-muted-foreground)">{g}</text>
         </g>
       ))}
       {series[0].labels.map((lab, i) => (
-        <text key={lab} x={x(i)} y={H - 8} fontSize="10" fill="#64748b" textAnchor="middle">{lab}</text>
+        <text key={lab} x={x(i)} y={H - 8} fontSize="10" fill="var(--color-muted-foreground)" textAnchor="middle">{lab}</text>
       ))}
       {series.map((s) => (
         <g key={s.name}>
@@ -120,8 +120,8 @@ function AvatarFace({ speaking }: { speaking: boolean }) {
   }, []);
   return (
     <svg viewBox="0 0 96 100" className="h-16 w-16 shrink-0">
-      <circle cx="48" cy="48" r="46" fill="#eef2ff" stroke="#c7d2fe" strokeWidth="2" />
-      <circle cx="48" cy="42" r="22" fill="#6366f1" />
+      <circle cx="48" cy="48" r="46" fill="#E8F0EE" stroke="#AEC3B0" strokeWidth="2" />
+      <circle cx="48" cy="42" r="22" fill="#0E6E6A" />
       <g fill="#ffffff">
         <ellipse cx="40" cy="40" rx="3" ry={blink ? 0.6 : 3} />
         <ellipse cx="56" cy="40" rx="3" ry={blink ? 0.6 : 3} />
@@ -129,7 +129,7 @@ function AvatarFace({ speaking }: { speaking: boolean }) {
       <rect x="42" y="49" width="12" height={speaking ? 5 : 2} rx="2" fill="#ffffff">
         {speaking && <animate attributeName="height" values="2;6;2" dur="0.45s" repeatCount="indefinite" />}
       </rect>
-      <path d="M22 96 a26 22 0 0 1 52 0 z" fill="#6366f1" />
+      <path d="M22 96 a26 22 0 0 1 52 0 z" fill="#0E6E6A" />
     </svg>
   );
 }
@@ -1436,8 +1436,8 @@ export function FollowUp({ profile }: { profile: PatientProfile }) {
     branch.week2,
   ].concat(branch.later);
   const series = [
-    { name: "PHQ-9", color: "#4f46e5", labels: ["Wk0", "Wk2", "Wk4", "Wk8"], points: branch.trend.phq },
-    { name: "GAD-7", color: "#0d9488", labels: ["Wk0", "Wk2", "Wk4", "Wk8"], points: branch.trend.gad },
+    { name: "PHQ-9", color: "#0E6E6A", labels: ["Wk0", "Wk2", "Wk4", "Wk8"], points: branch.trend.phq },
+    { name: "GAD-7", color: "#FF8C69", labels: ["Wk0", "Wk2", "Wk4", "Wk8"], points: branch.trend.gad },
   ];
 
   return (
