@@ -388,7 +388,15 @@ function InteractiveIntakeChat({
             <b className="text-foreground">Important.</b> Your assistant cannot provide diagnosis or treatment. In an emergency, call 911 or go to the nearest emergency department.
           </div>
           <button
-            onClick={onComplete}
+            onClick={() => {
+              setTurns((t) => [
+                ...t,
+                { role: "patient", text: "I'm ready for screening." },
+              ]);
+              setStage("phq");
+              setQIndex(0);
+              setTimeout(() => askPhq(0), 300);
+            }}
             className="mt-4 w-full rounded-xl border border-primary/20 bg-card px-4 py-2 text-sm font-bold text-primary/90 hover:bg-primary/10"
           >
             I'm ready for screening →
