@@ -49,13 +49,13 @@
 
 :root {
   --radius: 0.625rem;
-  /* Warm Ivory background */
-  --background: oklch(0.9762 0.0566 29.5823);
+  /* Off-white background */
+  --background: oklch(0.972 0.005 85);
   /* Midnight Navy text */
   --foreground: oklch(0.2715 0.1491 206.2111);
-  --card: oklch(0.9762 0.0566 29.5823);
+  --card: oklch(0.978 0.004 85);
   --card-foreground: oklch(0.2715 0.1491 206.2111);
-  --popover: oklch(0.9762 0.0566 29.5823);
+  --popover: oklch(0.978 0.004 85);
   --popover-foreground: oklch(0.2715 0.1491 206.2111);
   /* Deep Teal primary */
   --primary: oklch(0.4927 0.3769 178.0926);
@@ -63,7 +63,7 @@
   /* Soft Sage secondary */
   --secondary: oklch(0.8076 0.0845 150.5548);
   --secondary-foreground: oklch(0.2715 0.1491 206.2111);
-  --muted: oklch(0.9376 0.0466 29.5823);
+  --muted: oklch(0.94 0.01 85);
   --muted-foreground: oklch(0.4515 0.1091 206.2111);
   /* Coral Peach accent */
   --accent: oklch(0.7208 0.5841 5.8708);
