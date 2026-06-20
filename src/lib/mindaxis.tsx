@@ -393,9 +393,7 @@ function InteractiveIntakeChat({
                 ...t,
                 { role: "patient", text: "I'm ready for screening." },
               ]);
-              setStage("phq");
-              setQIndex(0);
-              setTimeout(() => askPhq(0), 300);
+              onComplete();
             }}
             className="mt-4 w-full rounded-xl border border-primary/20 bg-card px-4 py-2 text-sm font-bold text-primary/90 hover:bg-primary/10"
           >
