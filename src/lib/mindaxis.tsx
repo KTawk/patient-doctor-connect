@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
+import axisAvatarImg from "@/assets/axis-avatar.jpg";
 
 export const PHQ9_ITEMS = [
   "Little interest or pleasure in doing things",
@@ -326,36 +327,84 @@ function InteractiveIntakeChat({
 
   const concernSuggestions = ["I am feeling anxious.", "I've been feeling down.", "I'm having trouble sleeping.", "I'm stressed at work."];
 
+  const submitText = () => {
+    const value = input.trim();
+    if (!value) return;
+    if (stage === "concern") sendConcern(value);
+    setInput("");
+  };
+
+  const startMic = () => {
+    const w = typeof window !== "undefined" ? (window as any) : null;
+    const SR = w?.SpeechRecognition || w?.webkitSpeechRecognition;
+    if (!SR) {
+      alert("Voice input isn't supported in this browser. Try Chrome or Edge.");
+      return;
+    }
+    const rec = new SR();
+    rec.lang = "en-US";
+    rec.interimResults = false;
+    rec.maxAlternatives = 1;
+    rec.onresult = (e: any) => {
+      const transcript = e.results?.[0]?.[0]?.transcript ?? "";
+      if (transcript) setInput((prev) => (prev ? prev + " " + transcript : transcript));
+    };
+    try { rec.start(); } catch (e) { /* ignore */ }
+  };
+
   return (
-    <Card accent="border-indigo-200">
-      <div className="mb-3 flex items-center justify-between">
-        <h3 className="text-sm font-bold uppercase tracking-wide text-slate-500">Talk with Axis</h3>
-        <div className="flex gap-2">
-          <button onClick={() => setVoice((v) => !v)} className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-500 hover:bg-slate-200">
-            {voice ? "Voice on" : "Voice off"}
+    <div className="grid gap-4 md:grid-cols-[280px_1fr]">
+      {/* Left: avatar identity card */}
+      <Card accent="border-indigo-200">
+        <div className="flex flex-col items-center text-center">
+          <img
+            src={axisAvatarImg}
+            alt="Axis assistant"
+            width={320}
+            height={320}
+            loading="lazy"
+            className="aspect-square w-full rounded-2xl object-cover"
+          />
+          <h3 className="mt-4 text-xl font-extrabold text-slate-900">Axis assistant</h3>
+          <p className="mt-1 flex items-center justify-center gap-1.5 text-xs text-slate-500">
+            <span className={`h-1.5 w-1.5 rounded-full ${speaking ? "bg-emerald-500" : "bg-slate-400"}`} />
+            AI-enabled · usually replies instantly
+          </p>
+          <div className="mt-4 w-full rounded-xl border border-slate-200 bg-slate-50 p-3 text-left text-xs text-slate-600">
+            <b className="text-slate-800">Important.</b> Your assistant cannot provide diagnosis or treatment. In an emergency, call 911 or go to the nearest emergency department.
+          </div>
+          <button
+            onClick={onComplete}
+            className="mt-4 w-full rounded-xl border border-indigo-200 bg-white px-4 py-2 text-sm font-bold text-indigo-700 hover:bg-indigo-50"
+          >
+            I'm ready for screening →
           </button>
-          <button onClick={onComplete} className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-400 hover:bg-slate-200">Skip</button>
+          <p className="mt-2 text-xs text-slate-400">A few short questions, then book your visit.</p>
+          <button
+            onClick={() => setVoice((v) => !v)}
+            className="mt-3 text-xs font-semibold text-slate-500 hover:text-slate-700"
+          >
+            {voice ? "🔊 Voice on" : "🔇 Voice off"}
+          </button>
         </div>
-      </div>
-      <div className="flex items-start gap-3">
-        <AvatarFace speaking={speaking} />
-        <div className="flex-1 space-y-3">
-          <div className="text-xs font-semibold text-indigo-600">Axis, your check-in guide</div>
-          <div className="max-h-80 space-y-2 overflow-y-auto pr-1">
+      </Card>
+
+      {/* Right: chat panel */}
+      <Card accent="border-indigo-200">
+        <div className="flex h-[28rem] flex-col">
+          <div className="flex-1 space-y-3 overflow-y-auto pr-1">
             {turns.map((t, i) => (
               <div key={i} className={t.role === "avatar" ? "flex justify-start" : "flex justify-end"}>
                 <p className={
                   t.role === "avatar"
                     ? "max-w-[85%] whitespace-pre-line rounded-2xl rounded-tl-sm bg-indigo-50 p-3 text-slate-800"
-                    : "max-w-[85%] rounded-2xl rounded-tr-sm bg-indigo-600 p-3 text-white"
+                    : "max-w-[85%] rounded-2xl rounded-tr-sm bg-slate-900 p-3 text-white"
                 }>{t.text}</p>
               </div>
             ))}
-          </div>
 
-          {stage === "concern" && (
-            <div className="space-y-2">
-              <div className="flex flex-wrap gap-2">
+            {stage === "concern" && (
+              <div className="flex flex-wrap gap-2 pt-1">
                 {concernSuggestions.map((s) => (
                   <button key={s} onClick={() => sendConcern(s)}
                     className="rounded-full border border-indigo-200 bg-white px-3 py-1.5 text-xs font-semibold text-indigo-700 hover:bg-indigo-50">
@@ -363,54 +412,73 @@ function InteractiveIntakeChat({
                   </button>
                 ))}
               </div>
-              <form onSubmit={(e) => { e.preventDefault(); sendConcern(input); }} className="flex gap-2">
-                <input
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  placeholder="Type how you're feeling..."
-                  className="flex-1 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm focus:border-indigo-400 focus:outline-none"
-                />
-                <button type="submit" className="rounded-xl bg-indigo-600 px-4 py-2 text-sm font-bold text-white hover:bg-indigo-700">Send</button>
-              </form>
-            </div>
-          )}
+            )}
 
-          {stage === "consent" && (
-            <div className="flex flex-wrap gap-2">
-              <button onClick={() => handleConsent(true)}
-                className="rounded-full border border-indigo-200 bg-indigo-600 px-4 py-1.5 text-sm font-bold text-white hover:bg-indigo-700">
-                Sure
-              </button>
-              <button onClick={() => handleConsent(false)}
-                className="rounded-full border border-slate-200 bg-white px-4 py-1.5 text-sm font-semibold text-slate-600 hover:bg-slate-50">
-                Not right now
-              </button>
-            </div>
-          )}
-
-          {(stage === "phq" || stage === "gad") && (
-            <div className="space-y-2">
-              <div className="flex flex-wrap gap-2">
-                {FREQ.map((label, i) => (
-                  <button
-                    key={label}
-                    onClick={() => answerFreq(i)}
-                    className="rounded-full border border-indigo-200 bg-white px-3 py-1.5 text-xs font-semibold text-indigo-700 hover:bg-indigo-50"
-                  >
-                    {label}
-                  </button>
-                ))}
+            {stage === "consent" && (
+              <div className="flex flex-wrap justify-end gap-2 pt-1">
+                <button onClick={() => handleConsent(true)}
+                  className="rounded-full bg-indigo-600 px-4 py-1.5 text-sm font-bold text-white hover:bg-indigo-700">
+                  Sure
+                </button>
+                <button onClick={() => handleConsent(false)}
+                  className="rounded-full border border-slate-200 bg-white px-4 py-1.5 text-sm font-semibold text-slate-600 hover:bg-slate-50">
+                  Not right now
+                </button>
               </div>
-              <p className="text-xs text-slate-400">
-                {stage === "phq" ? `Question ${qIndex + 1} of ${PHQ9_ITEMS.length} (depression screen)` : `Question ${qIndex + 1} of ${GAD7_ITEMS.length} (anxiety screen)`}
-              </p>
-            </div>
-          )}
+            )}
 
-          <p className="text-xs text-slate-400">Axis is supportive, not therapeutic. It never diagnoses or manages crisis. Safety routes to your physician.</p>
+            {(stage === "phq" || stage === "gad") && (
+              <div className="space-y-2 pt-1">
+                <div className="flex flex-wrap gap-2">
+                  {FREQ.map((label, i) => (
+                    <button
+                      key={label}
+                      onClick={() => answerFreq(i)}
+                      className="rounded-full border border-indigo-200 bg-white px-3 py-1.5 text-xs font-semibold text-indigo-700 hover:bg-indigo-50"
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+                <p className="text-xs text-slate-400">
+                  {stage === "phq" ? `Question ${qIndex + 1} of ${PHQ9_ITEMS.length} (depression screen)` : `Question ${qIndex + 1} of ${GAD7_ITEMS.length} (anxiety screen)`}
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Composer */}
+          <form
+            onSubmit={(e) => { e.preventDefault(); submitText(); }}
+            className="mt-3 flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 p-1.5"
+          >
+            <button
+              type="button"
+              onClick={startMic}
+              aria-label="Speak"
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white text-slate-600 shadow-sm hover:bg-slate-100"
+            >
+              🎤
+            </button>
+            <input
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder={stage === "concern" ? "Type a message..." : "Use the buttons above to answer"}
+              disabled={stage !== "concern"}
+              className="flex-1 bg-transparent px-2 text-sm placeholder:text-slate-400 focus:outline-none disabled:cursor-not-allowed"
+            />
+            <button
+              type="submit"
+              disabled={stage !== "concern" || !input.trim()}
+              aria-label="Send"
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-slate-900 text-white shadow-sm hover:bg-slate-800 disabled:opacity-40"
+            >
+              →
+            </button>
+          </form>
         </div>
-      </div>
-    </Card>
+      </Card>
+    </div>
   );
 }
 
