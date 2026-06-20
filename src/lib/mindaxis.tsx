@@ -562,7 +562,7 @@ const ELENA: PatientProfile = {
       summary: ["Anxiety symptoms returning", "Step-up to brief CBT recommended", "Reassess in 4 weeks"],
       week2: { wk: "Week 2", tone: "bad", flag: true, title: "Symptom return", note: "Elena reports recurrence; brief CBT referral made." },
       later: [
-        { wk: "Week 4", tone: "warn", flag: false, title: "Therapy started", node: "" as any, note: "PHQ-9 7, GAD-7 9. Engaged in brief CBT." },
+        { wk: "Week 4", tone: "warn", flag: false, title: "Therapy started", note: "PHQ-9 7, GAD-7 9. Engaged in brief CBT." },
         { wk: "Week 8", tone: "ok", flag: false, title: "Responding", note: "PHQ-9 5, GAD-7 6." },
       ],
       trend: { phq: [5, 8, 7, 5], gad: [6, 11, 9, 6] },
